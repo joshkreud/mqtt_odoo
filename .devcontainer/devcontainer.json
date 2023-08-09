@@ -1,0 +1,56 @@
+{
+  "name": "mqtt_odoo",
+  "workspaceFolder": "/mqtt_odoo",
+  "dockerComposeFile": ["docker-compose.yml"],
+  "initializeCommand": "bash ./scripts/prep_workspace.sh",
+  "shutdownAction": "stopCompose",
+  "service": "app",
+  "postCreateCommand": "poetry run pre-commit install",
+  "remoteUser": "ContainerUser",
+  "remoteEnv": {
+    "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}/" // For Docker compose workspace bindmount
+  },
+  "customizations": {
+    "vscode": {
+      // vscode Extensions to install in the devcontainer
+      "extensions": [
+        "visualstudioexptteam.vscodeintellicode",
+        "christian-kohler.path-intellisense",
+        "njpwerner.autodocstring",
+        "eamodio.gitlens",
+        "naumovs.color-highlight",
+        "mechatroner.rainbow-csv",
+        "tamasfe.even-better-toml",
+        "janisdd.vscode-edit-csv",
+        "Gruntfuggly.todo-tree",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.black-formatter",
+        "ms-python.pylint",
+        "ms-python.isort",
+        "github.copilot",
+        "GitHub.copilot-chat"
+      ],
+      // Vscode Settings
+      "settings": {
+        "[markdown]": {
+          "editor.quickSuggestions": {
+            "other": "on",
+            "comments": "off",
+            "strings": "off"
+          }
+        },
+        "files.insertFinalNewline": true,
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.organizeImports": true
+        },
+        "[python]": {
+          "editor.defaultFormatter": "ms-python.black-formatter"
+        },
+        "python.languageServer": "Pylance",
+        "remote.localPortHost": "allInterfaces"
+      }
+    }
+  }
+}

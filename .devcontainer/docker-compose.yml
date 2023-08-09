@@ -1,0 +1,42 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    entrypoint: ["sleep", "infinity"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - TZ=${TZ:-Europe/Berlin}
+    volumes:
+      - ../:/mqtt_odoo:cached # Mount vscode Workspace
+      - commandhistory:/home/ContainerUser/.commandhistory
+    networks:
+      - traefik
+      - default
+    labels:
+      - traefik.enable=true
+
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.service=${COMPOSE_PROJECT_NAME}
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=HostRegexp(`${TRAEFIK_HOST_REGEX}`)
+      - traefik.http.services.${COMPOSE_PROJECT_NAME}.loadbalancer.server.port=8000
+
+  mqtt:
+    build:
+      dockerfile: Dockerfile.mosquitto
+    networks:
+      - default
+      - traefik
+    labels:
+      - traefik.enable=true
+      - traefik.tcp.routers.${COMPOSE_PROJECT_NAME}-mqtt.entrypoints=internal
+      - traefik.tcp.routers.${COMPOSE_PROJECT_NAME}-mqtt.rule=HostSNIRegexp(`broker-${TRAEFIK_HOST_REGEX}`)
+      - traefik.tcp.routers.${COMPOSE_PROJECT_NAME}-mqtt.tls=true
+      - traefik.tcp.services.${COMPOSE_PROJECT_NAME}-mqtt.loadbalancer.server.port=1883
+
+networks:
+  traefik:
+    external: true
+volumes:
+  commandhistory:

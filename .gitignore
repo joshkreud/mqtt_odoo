@@ -1,0 +1,5 @@
+*.pyc
+.env
+dist/
+station_dump.yml
+payload_example.json
