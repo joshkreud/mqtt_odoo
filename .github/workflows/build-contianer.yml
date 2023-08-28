@@ -58,3 +58,4 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.image_tag_lower.outputs.IMAGE_TAG }}
+          target: prod
