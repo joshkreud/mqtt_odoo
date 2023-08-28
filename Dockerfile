@@ -12,4 +12,4 @@ RUN poetry install --all-extras --no-root --no-interaction --no-ansi --no-dev
 COPY --chown=$USERNAME:$USERNAME . .
 RUN sudo rm .env || true && poetry install --all-extras --no-interaction --no-ansi --no-dev
 
-ENTRYPOINT [ "mqtt_odoo" ]
+ENTRYPOINT [ "mqtt_odoo_proxy" ]

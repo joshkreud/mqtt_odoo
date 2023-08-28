@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "odoo_mqtt"
+name = "mqtt_odoo_proxy"
 version = "0.0.1"
 description = "Tool to listen to MQTT and transmit data to a Database"
 authors = ["Joshua Kreuder <joshua_kreuder@outlook.de>"]
