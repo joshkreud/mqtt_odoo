@@ -10,6 +10,6 @@ COPY --chown=${USERNAME}:${USERNAME} pyproject.toml poetry.lock ./
 # Install only dependencies, so they only reinstall when lock or toml where changed
 RUN poetry install --all-extras --no-root --no-interaction --no-ansi --no-dev
 COPY --chown=$USERNAME:$USERNAME . .
-RUN sudo rm .env || true && poetry install --all-extras --no-interaction --no-ansi --no-dev
+RUN poetry install --all-extras --no-interaction --no-ansi --no-dev
 
 ENTRYPOINT [ "mqtt_odoo_proxy" ]
