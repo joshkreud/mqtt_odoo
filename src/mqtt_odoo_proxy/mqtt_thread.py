@@ -84,7 +84,8 @@ class MQTTThread(threading.Thread):
         msg : _type_
             _description_
         """
-        LOGGER.info("Message received on topic %s: %s", msg.topic, msg.payload)
+        LOGGER.info("Message received on topic %s", msg.topic)
+        LOGGER.debug("Message Payload: %s", msg.payload)
         subscriptions = [sub for sub in self.subscriptions.values() if sub.topic == msg.topic]
         for subscription in subscriptions:
             try:
