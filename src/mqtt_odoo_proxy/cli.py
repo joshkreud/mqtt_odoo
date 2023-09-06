@@ -14,7 +14,17 @@ def get_cli():
     cli = typer.Typer()
 
     @cli.command()
-    def start(verbose: Annotated[bool, typer.Option("-v", "--verbose", help="Verbose Logging")] = False):
+    def start(
+        verbose: Annotated[
+            bool,
+            typer.Option(
+                "-v",
+                "--verbose",
+                help="Verbose Logging",
+                envvar="MQTT_ODOO_PROXY_VERBOSE",
+            ),
+        ] = False
+    ):
         """Starts the FastAPI Server"""
         set_logging(verbose)
         run(api_app, host="0.0.0.0", port=8000)
