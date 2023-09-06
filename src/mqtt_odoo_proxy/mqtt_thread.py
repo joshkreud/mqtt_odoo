@@ -6,7 +6,7 @@ from logging import getLogger
 import paho.mqtt.client as mqtt
 
 from .models import MQTTClientArgs, Subscribtion
-from .odoo import odoo_onmessage
+from .odoo import odoo_check_connection, odoo_onmessage
 
 LOGGER = getLogger(__name__)
 
@@ -89,7 +89,12 @@ class MQTTThread(threading.Thread):
         subscriptions = [sub for sub in self.subscriptions.values() if sub.topic == msg.topic]
         for subscription in subscriptions:
             try:
-                odoo_onmessage(self.client_args.odoo_base_url, subscription.odoo_id, msg.payload)
+                odoo_onmessage(
+                    odoo_base_url=self.client_args.odoo_base_url,
+                    odoo_topic_id=subscription.odoo_id,
+                    odoo_auth_token=self.client_args.odoo_mqtt_token,
+                    payload=msg.payload,
+                )
             except Exception as error:  # pylint: disable=broad-except
                 LOGGER.exception("Error while sending message to odoo: %s", error)
 
@@ -138,10 +143,16 @@ class MQTTThread(threading.Thread):
         """Starts the thread. Delays until thread is running or timeout is reached to avoid race conditions"""
         LOGGER.info("Starting MQTT Thread: %s", self.client_args.odoo_id)
         super().start()
+        # Hold until Thread is reported running
         timeout = 2
         curr_time = time.time()
         while not self.running and time.time() < curr_time + timeout:
             time.sleep(0.1)
+
+        # Check if the Callback Works
+        if not odoo_check_connection(self.client_args.odoo_base_url, self.client_args.odoo_mqtt_token):
+            LOGGER.exception("Odoo Connection Check failed. Stopping MQTT Thread %s", self.client_args.odoo_id)
+            self.stop()
 
     def stop(self):
         """Gets called when thread stops"""
