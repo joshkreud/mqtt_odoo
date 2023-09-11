@@ -29,14 +29,18 @@ def odoo_onmessage(odoo_base_url: str, odoo_topic_id: int, odoo_auth_token: str,
     if isinstance(payload, bytes):
         payload = base64.b64encode(payload).decode("utf-8")
     LOGGER.debug("Sending Payload to url: %s -> %s", odoo_sub_url, payload)
-    response = requests.post(
-        odoo_sub_url,
-        json={"payload": payload},
-        headers={"X-MQTT-Auth-Token": odoo_auth_token},
-        timeout=2,
-    )
-    LOGGER.debug("Odoo Response: %s:%s", response, response.text)
-    if response.status_code == 200:
-        return True
-    LOGGER.warning("Odoo onMessage Response: %s:%s", response, response.text)
-    return False
+    try:
+        response = requests.post(
+            odoo_sub_url,
+            json={"payload": payload},
+            headers={"X-MQTT-Auth-Token": odoo_auth_token},
+            timeout=2,
+        )
+        LOGGER.debug("Odoo Response: %s:%s", response, response.text)
+        if response.status_code == 200:
+            return True
+        LOGGER.warning("Odoo onMessage Response: %s:%s", response, response.text)
+        return False
+    except requests.exceptions.ConnectionError as err:
+        LOGGER.warning("Odoo onMessage ConnectionError: %s", err)
+        return False
