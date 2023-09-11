@@ -22,11 +22,13 @@ class MQTTThread(threading.Thread):
         self.name = f"MQTTThread-{self.client_args.odoo_id}"
         self.daemon = True
         self.running = False
+        self.connected = False
         self.subscriptions: dict[int, Subscribtion] = {}  # {subscription_id: Subscribtion}
-        self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.client.on_subscribe = self.on_subscribe
         self.client.on_connect_fail = self.on_connect_fail
+        self.client.on_connect = self.on_connect
+        self.client.on_disconnect = self.on_disconnect
 
     def add_subscription(self, subscription: Subscribtion):
         """Adds a subscription to the client
@@ -71,6 +73,18 @@ class MQTTThread(threading.Thread):
             _description_
         """
         LOGGER.info("Connected with result code %s", rc)
+        if rc == 0:
+            self.connected = True
+            for subscription in self.subscriptions.values():
+                LOGGER.info("MQTT Client %s Subscribing to %s", self.client_args.odoo_id, subscription)
+                subscription.mid = self.client.subscribe(subscription.topic)
+        else:
+            LOGGER.warning("MQTT Connection failed with result code %s", rc)
+
+    def on_disconnect(self, client, userdata, rc):  # pylint: disable=unused-argument,invalid-name
+        """Callback function for MQTT Disconnect"""
+        LOGGER.info("MQTT Client Disconnected with result code %s", rc)
+        self.connected = False
 
     def on_message(self, client, userdata, msg):  # pylint: disable=unused-argument
         """Callback function for MQTT Message

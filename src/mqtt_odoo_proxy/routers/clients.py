@@ -45,8 +45,6 @@ async def add_client(client: MQTTClientArgs) -> MQTTThreadStatus:
     thread = MQTTThread(client)
     MQTT_THREADS[client.odoo_id] = thread
     thread.start()
-    for sub in client.subscriptions:
-        thread.add_subscription(sub)
     return MQTTThreadStatus(
         thread_id=client.odoo_id,
         thread_running=thread.is_alive(),
@@ -105,4 +103,5 @@ async def get_client_status(client_id: int) -> MQTTThreadStatus:
     return MQTTThreadStatus(
         thread_id=client_id,
         thread_running=thread.is_alive(),
+        client_connected=thread.connected,
     )

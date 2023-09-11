@@ -46,3 +46,4 @@ class MQTTThreadStatus(BaseModel):
 
     thread_id: int
     thread_running: bool
+    client_connected: bool
