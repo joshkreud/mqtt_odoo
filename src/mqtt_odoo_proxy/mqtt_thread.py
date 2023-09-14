@@ -75,7 +75,7 @@ class MQTTThread(threading.Thread):
         LOGGER.info("Connected with result code %s", rc)
         if rc == 0:
             self.connected = True
-            for subscription in self.subscriptions.values():
+            for subscription in self.client_args.subscriptions:
                 LOGGER.info("MQTT Client %s Subscribing to %s", self.client_args.odoo_id, subscription)
                 subscription.mid = self.client.subscribe(subscription.topic)
         else:
