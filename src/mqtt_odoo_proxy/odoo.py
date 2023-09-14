@@ -13,7 +13,7 @@ def odoo_check_connection(odoo_base_url: str, odoo_auth_token: str) -> bool:
     LOGGER.debug("Checking connection to Odoo")
     odoo_url = odoo_base_url + "/mqtt/check"
     LOGGER.debug("Sending Request to url: %s", odoo_url)
-    response = requests.get(odoo_url, headers={"X-MQTT-Auth-Token": odoo_auth_token}, timeout=60)
+    response = requests.get(odoo_url, headers={"X-MQTT-Auth-Token": odoo_auth_token}, timeout=10)
     LOGGER.debug("Odoo Response: %s:%s", response, response.text)
     if response.status_code == 200:
         return True
@@ -34,7 +34,7 @@ def odoo_onmessage(odoo_base_url: str, odoo_topic_id: int, odoo_auth_token: str,
             odoo_sub_url,
             json={"payload": payload},
             headers={"X-MQTT-Auth-Token": odoo_auth_token},
-            timeout=2,
+            timeout=60,
         )
         LOGGER.debug("Odoo Response: %s:%s", response, response.text)
         if response.status_code == 200:
