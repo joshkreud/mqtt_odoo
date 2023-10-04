@@ -13,7 +13,7 @@ class Subscribtion(BaseModel):
     topic: str
     odoo_id: int
     client_id: int
-    mid: tuple[int, int] = None
+    mid: int = 0
 
 
 class MQTTClientArgs(BaseModel):
@@ -21,7 +21,7 @@ class MQTTClientArgs(BaseModel):
 
     odoo_id: int
     odoo_base_url: str
-    odoo_mqtt_token: str
+    odoo_mqtt_token: str = Field("", repr=False)
     odoo_user_id: int
     mqtt_host: str
     mqtt_port: int = 1883

@@ -16,7 +16,7 @@ rich = "^12.6.0"
 paho-mqtt = "^1.6.1"
 python-dotenv = "^0.21.0"
 fastapi = "^0.101.0"
-typer-common-functions = "^0.0.5"
+typer-common-functions = "^0.0.7"
 uvicorn = "^0.23.2"
 requests = "^2.31.0"
 
