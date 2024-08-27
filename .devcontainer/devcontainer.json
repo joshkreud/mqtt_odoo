@@ -5,7 +5,7 @@
   "initializeCommand": "bash ./scripts/prep_workspace.sh",
   "shutdownAction": "stopCompose",
   "service": "app",
-  "postCreateCommand": "poetry run pre-commit install",
+  "postCreateCommand": "poetry run pre-commit install --install-hooks",
   "remoteUser": "ContainerUser",
   "remoteEnv": {
     "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}/" // For Docker compose workspace bindmount
