@@ -23,7 +23,7 @@ class MQTTThread(threading.Thread):
         self.running = False
         self.connected = False
         self.connecting = False
-        self.subscriptions: dict[int, Subscribtion] = {}  # {subscription_id: Subscribtion}
+        self.active_subscriptions: dict[int, Subscribtion] = {}  # {subscription_id: Subscribtion}
 
         # Set Callbacks
         self.client.on_message = self.on_message
@@ -46,7 +46,7 @@ class MQTTThread(threading.Thread):
         -------
         Subscribtion
         """
-        for subscription in self.subscriptions.values():
+        for subscription in self.active_subscriptions.values():
             if subscription.mid == mid:
                 return subscription
         self.logger.warning("Subscription with mid '%s' not found", mid)
@@ -65,7 +65,7 @@ class MQTTThread(threading.Thread):
         if not result == 0:
             self.logger.warning("Subscription failed with result code %s", result)
             raise ConnectionError(f"Subscription failed with result code {result}")
-        self.subscriptions[subscription.odoo_id] = subscription
+        self.active_subscriptions[subscription.odoo_id] = subscription
 
     def remove_subscription(self, subscription_id: int):
         """Removes a subscription from the client
@@ -75,7 +75,7 @@ class MQTTThread(threading.Thread):
         subscription_id : int
             id of the subscription to remove
         """
-        subscription = self.subscriptions.get(subscription_id)
+        subscription = self.active_subscriptions.get(subscription_id)
         if not subscription:
             self.logger.warning("Subscription with id %s not found", subscription_id)
             raise KeyError(f"Subscription {subscription_id} not found in thread {self.client_args}")
@@ -109,13 +109,14 @@ class MQTTThread(threading.Thread):
     def on_disconnect(self, client, userdata, rc):  # pylint: disable=unused-argument,invalid-name
         """Callback function for MQTT Disconnect"""
         self.logger.info("MQTT Client Disconnected with result code %s", rc)
+        self.active_subscriptions.clear()
         self.connected = False
 
     def on_message(self, client, userdata, msg):  # pylint: disable=unused-argument
         """Paho-Mqtt Callback function for MQTT Message"""
         self.logger.info("Message received on topic %s", msg.topic)
         self.logger.debug("Message Payload: %s", msg.payload)
-        subscriptions = [sub for sub in self.subscriptions.values() if sub.topic == msg.topic]
+        subscriptions = [sub for sub in self.active_subscriptions.values() if sub.topic == msg.topic]
         for subscription in subscriptions:
             try:
                 odoo_onmessage(
@@ -157,6 +158,7 @@ class MQTTThread(threading.Thread):
         self.running = True
         while self.running:
             if not self.connected and not self.connecting:
+                self.logger.info("Not connected. Trying to connect")
                 self.connect()
             else:
                 self.client.loop_read()

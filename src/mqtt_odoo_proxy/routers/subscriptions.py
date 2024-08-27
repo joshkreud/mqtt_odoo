@@ -21,7 +21,7 @@ async def get_subscriptions() -> list[Subscribtion]:
     """
     subscriptions = []
     for thread in MQTT_THREADS.values():
-        subscriptions.extend(thread.subscriptions.values())
+        subscriptions.extend(thread.active_subscriptions.values())
     return subscriptions
 
 
@@ -40,7 +40,7 @@ async def get_subscription_status(subscription_id: int) -> Subscribtion:
         subscription
     """
     for thread in MQTT_THREADS.values():
-        subscription = thread.subscriptions.get(subscription_id)
+        subscription = thread.active_subscriptions.get(subscription_id)
         if subscription:
             return subscription
     raise HTTPException(status_code=404, detail="Subscription not found")
