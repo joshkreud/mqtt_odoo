@@ -61,21 +61,20 @@ async def add_subscription(subscription: Subscribtion):
     thread.add_subscription(subscription)
 
 
-@router.post("{subscription_id}/remove")
-async def remove_subscription(client_id: int, subscription_id: int):
+@router.post("/{subscription_id}/remove")
+async def remove_subscription(subscription_id: int):
     """Removes a MQTT Subscription from a client
 
     Parameters
     ----------
-    client_id : int
-        id of the client to remove the subscription from
     subscription_id : int
         subscription id
     """
-    thread = MQTT_THREADS.get(client_id)
-    if not thread:
-        raise HTTPException(status_code=404, detail="Client not found")
-    try:
-        thread.remove_subscription(subscription_id)
-    except ValueError as error:
-        raise HTTPException(status_code=404, detail="Subscription not found") from error
+    for thread in MQTT_THREADS.values():
+        if thread.active_subscriptions.get(subscription_id):
+            try:
+                thread.remove_subscription(subscription_id)
+                return
+            except ValueError as error:
+                raise HTTPException(status_code="500", detail="Could not Remove subscription") from error
+    raise HTTPException(status_code=404, detail="Subscription not found")
